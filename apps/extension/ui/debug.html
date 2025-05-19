@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>IndexedDB Debug</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    #results {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow: auto;
+    }
+    button {
+      margin-right: 10px;
+      padding: 8px 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>IndexedDB Debugger</h1>
+  <div>
+    <button id="checkDB">Check Database</button>
+    <button id="createDB">Force Create Database</button>
+    <button id="addSample">Add Sample Data</button>
+    <button id="clearDB">Clear Database</button>
+  </div>
+  <div id="results"></div>
+
+  <script type="module">
+    const resultsEl = document.getElementById('results');
+    const DB_NAME = 'workflow-recorder-db';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'events';
+
+    function log(message) {
+      console.log(message);
+      resultsEl.textContent += message + '\n';
+    }
+
+    // Check database existence with indexedDB.databases() API
+    document.getElementById('checkDB').addEventListener('click', async () => {
+      resultsEl.textContent = '';
+      try {
+        log('Checking databases...');
+        
+        if ('databases' in indexedDB) {
+          const databases = await indexedDB.databases();
+          log(`Found ${databases.length} databases:`);
+          databases.forEach(db => {
+            log(`- ${db.name} (version ${db.version})`);
+          });
+        } else {
+          log('indexedDB.databases() API not supported in this browser');
+        }
+        
+        // Try to open our specific database
+        log('\nTrying to open our database directly...');
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onerror = (event) => {
+          log(`Error opening database: ${event.target.error}`);
+        };
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          log(`Successfully opened database: ${db.name} (version ${db.version})`);
+          
+          const storeNames = Array.from(db.objectStoreNames);
+          log(`Object stores: ${storeNames.join(', ') || 'none'}`);
+          
+          db.close();
+        };
+        
+        request.onupgradeneeded = (event) => {
+          log('Database upgrade needed (this means it did not exist or version was lower)');
+          const db = event.target.result;
+          
+          // Create object store if it doesn't exist
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            log(`Creating object store: ${STORE_NAME}`);
+            const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            store.createIndex('caseId', 'caseId');
+            store.createIndex('activity', 'activity');
+            store.createIndex('ts', 'ts');
+          }
+        };
+      } catch (err) {
+        log(`Error: ${err.message}`);
+      }
+    });
+
+    // Force create database
+    document.getElementById('createDB').addEventListener('click', () => {
+      resultsEl.textContent = '';
+      try {
+        log('Forcing database creation...');
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onerror = (event) => {
+          log(`Error creating database: ${event.target.error}`);
+        };
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          log(`Successfully created/opened database: ${db.name} (version ${db.version})`);
+          db.close();
+        };
+        
+        request.onupgradeneeded = (event) => {
+          log('Creating/upgrading database structure...');
+          const db = event.target.result;
+          
+          // Create object store if it doesn't exist
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            log(`Creating object store: ${STORE_NAME}`);
+            const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            store.createIndex('caseId', 'caseId');
+            store.createIndex('activity', 'activity');
+            store.createIndex('ts', 'ts');
+          } else {
+            log(`Object store ${STORE_NAME} already exists`);
+          }
+        };
+      } catch (err) {
+        log(`Error: ${err.message}`);
+      }
+    });
+
+    // Add sample data
+    document.getElementById('addSample').addEventListener('click', () => {
+      resultsEl.textContent = '';
+      try {
+        log('Adding sample data...');
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        
+        request.onerror = (event) => {
+          log(`Error opening database: ${event.target.error}`);
+        };
+        
+        request.onsuccess = (event) => {
+          const db = event.target.result;
+          log(`Database opened successfully`);
+          
+          const transaction = db.transaction([STORE_NAME], 'readwrite');
+          const store = transaction.objectStore(STORE_NAME);
+          
+          const sampleData = {
+            caseId: `session_${Date.now()}`,
+            activity: `click test-button`,
+            ts: Date.now(),
+            attributes: {
+              url: 'https://example.com',
+              title: 'Test Page',
+              visible_text: 'Sample Data'
+            }
+          };
+          
+          const addRequest = store.add(sampleData);
+          
+          addRequest.onsuccess = () => {
+            log(`Sample data added successfully with ID: ${addRequest.result}`);
+          };
+          
+          addRequest.onerror = (event) => {
+            log(`Error adding sample data: ${event.target.error}`);
+          };
+          
+          transaction.oncomplete = () => {
+            log('Transaction completed');
+            db.close();
+          };
+          
+          transaction.onerror = (event) => {
+            log(`Transaction error: ${event.target.error}`);
+          };
+        };
+        
+        request.onupgradeneeded = (event) => {
+          log('Database upgrade needed before adding data');
+          const db = event.target.result;
+          
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            log(`Creating object store: ${STORE_NAME}`);
+            const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            store.createIndex('caseId', 'caseId');
+            store.createIndex('activity', 'activity');
+            store.createIndex('ts', 'ts');
+          }
+        };
+      } catch (err) {
+        log(`Error: ${err.message}`);
+      }
+    });
+
+    // Clear database
+    document.getElementById('clearDB').addEventListener('click', () => {
+      resultsEl.textContent = '';
+      try {
+        log('Clearing database...');
+        const request = indexedDB.deleteDatabase(DB_NAME);
+        
+        request.onerror = (event) => {
+          log(`Error deleting database: ${event.target.error}`);
+        };
+        
+        request.onsuccess = () => {
+          log('Database deleted successfully');
+        };
+      } catch (err) {
+        log(`Error: ${err.message}`);
+      }
+    });
+
+    // Initial check
+    document.getElementById('checkDB').click();
+  </script>
+</body>
+</html> 

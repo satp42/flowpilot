@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Workflow Recorder</title>
+  <style>
+    body {
+      width: 400px;
+      padding: 10px;
+      font-family: system-ui, sans-serif;
+    }
+    #eventsContainer {
+      margin-top: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    .event-item {
+      border-bottom: 1px solid #eee;
+      padding: 5px 0;
+    }
+    .event-time {
+      font-size: 12px;
+      color: #666;
+    }
+    .button-row {
+      display: flex;
+      margin: 10px 0;
+    }
+    button {
+      margin-right: 10px;
+      padding: 5px 10px;
+    }
+    .debug-link {
+      font-size: 12px;
+      margin-top: 15px;
+      display: block;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Workflow Recorder</h2>
+  <p>Record browser actions to create automation.</p>
+  
+  <div class="button-row">
+    <button id="refreshBtn">Refresh Events</button>
+    <button id="clearBtn">Clear All Events</button>
+  </div>
+  
+  <div>
+    <h3>Recorded Events <span id="eventCount">(0)</span></h3>
+    <div id="eventsContainer">
+      <p id="emptyState">No events recorded yet. Interact with websites to capture events.</p>
+    </div>
+  </div>
+  
+  <a href="debug.html" target="_blank" class="debug-link">Open Debug Tools</a>
+  
+  <script src="popup.js" type="module"></script>
+</body>
+</html> 

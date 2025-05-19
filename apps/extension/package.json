@@ -1,0 +1,36 @@
+{
+  "name": "workflow-recorder-extension",
+  "version": "1.0.0",
+  "description": "Records on-screen actions, converts to graphs, and auto-evolves Playwright scripts",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite build --watch",
+    "lint": "eslint . --ext .ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "chrome-extension",
+    "process-mining",
+    "playwright",
+    "promptbreeder"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "idb": "^7.1.1"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^9.3.4",
+    "@testing-library/jest-dom": "^6.4.2",
+    "@types/chrome": "^0.0.260",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.14",
+    "fake-indexeddb": "^5.0.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.12"
+  }
+}

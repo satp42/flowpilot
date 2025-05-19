@@ -1,0 +1,29 @@
+{
+  "name": "Workflow Recorder",
+  "version": "1.0.0",
+  "description": "Records on-screen actions, converts to graphs, and auto-evolves Playwright scripts",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_title": "Workflow Recorder",
+    "default_popup": "ui/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/recorder.js"],
+      "run_at": "document_end"
+    }
+  ]
+} 
