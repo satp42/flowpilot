@@ -103,6 +103,60 @@ export class StorageService {
     }
   }
 
+  // Convert events to XES-compatible CSV format
+  async exportToCSV(): Promise<string> {
+    try {
+      const events = await this.getAllEvents();
+      
+      // Define CSV headers based on XES structure
+      // Using standard XES concept:name, time:timestamp, etc.
+      const headers = [
+        'case_id', // concept:name for the trace
+        'activity', // concept:name for the event
+        'timestamp', // time:timestamp
+        'url', // Extension attribute
+        'title', // Extension attribute
+        'visible_text', // Extension attribute
+        'tag' // Extension attribute
+      ];
+      
+      // Start with headers
+      let csvContent = headers.join(',') + '\n';
+      
+      // Add each event as a row
+      events.forEach(event => {
+        const row = [
+          event.caseId,
+          event.activity,
+          new Date(event.ts).toISOString(),
+          event.attributes?.url || '',
+          event.attributes?.title || '',
+          event.attributes?.visible_text || '',
+          event.attributes?.tag || ''
+        ];
+        
+        // Properly escape CSV fields (handle commas, quotes)
+        const escapedRow = row.map(field => {
+          // Convert to string
+          const str = String(field);
+          // If the field contains commas, quotes, or newlines, wrap in quotes
+          if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            // Double up any quotes inside the field
+            return `"${str.replace(/"/g, '""')}"`;
+          }
+          return str;
+        });
+        
+        csvContent += escapedRow.join(',') + '\n';
+      });
+      
+      return csvContent;
+    } catch (error) {
+      console.error('Error exporting events to CSV:', error);
+      throw error;
+    }
+  }
+
   // Export events to XES format (placeholder for future implementation)
   async exportToXES(): Promise<string> {
     const events = await this.getAllEvents();

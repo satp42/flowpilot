@@ -1,12 +1,25 @@
 {
   "name": "agent-hacks",
   "version": "1.0.0",
-  "description": "",
+  "description": "Browser extension that records actions, creates process graphs, and generates robust Playwright scripts",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
-  "keywords": [],
+  "keywords": [
+    "browser-extension",
+    "process-mining",
+    "playwright",
+    "promptbreeder"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "14.4.0"
+  }
 }

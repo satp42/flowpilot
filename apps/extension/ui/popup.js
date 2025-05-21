@@ -10,6 +10,7 @@ const emptyState = document.getElementById('emptyState');
 const eventCount = document.getElementById('eventCount');
 const refreshBtn = document.getElementById('refreshBtn');
 const clearBtn = document.getElementById('clearBtn');
+const exportCsvBtn = document.getElementById('exportCsvBtn');
 
 // Format a timestamp
 function formatTimestamp(ts) {
@@ -84,9 +85,32 @@ async function clearEvents() {
   }
 }
 
+// Export events to CSV
+async function exportEventsToCSV() {
+  try {
+    console.log('Exporting events to CSV...');
+    
+    // Send message to service worker to trigger flush
+    const response = await chrome.runtime.sendMessage({ command: 'flushEvents' });
+    
+    console.log('Export response:', response);
+    
+    // Show feedback to user
+    if (response.status === 'success') {
+      alert('Events exported to CSV successfully!');
+    } else {
+      alert(`Error exporting events: ${response.error || 'Unknown error'}`);
+    }
+  } catch (error) {
+    console.error('Error exporting events to CSV:', error);
+    alert(`Error exporting events: ${error.message || error}`);
+  }
+}
+
 // Add event listeners
 refreshBtn.addEventListener('click', loadEvents);
 clearBtn.addEventListener('click', clearEvents);
+exportCsvBtn.addEventListener('click', exportEventsToCSV);
 
 // Load events on popup open
 loadEvents(); 
